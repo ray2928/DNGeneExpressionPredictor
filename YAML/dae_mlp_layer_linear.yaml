@@ -1,0 +1,80 @@
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:predict_data.load_data {
+        start: 0,
+        stop: 80,
+        input: %(input)s,
+        output: %(output)s
+    },
+    model: !obj:pylearn2.models.mlp.MLP {
+        batch_size: %(batch_size)i,
+        layers: [
+                 !obj:pylearn2.models.mlp.PretrainedLayer {
+                     layer_name: 'h1',
+                     layer_content: !pkl: "%(save_path)s/dae_layer1.pkl"
+                 },
+                 !obj:pylearn2.models.mlp.PretrainedLayer {
+                     layer_name: 'h2',
+                     layer_content: !pkl: "%(save_path)s/dae_layer2.pkl"
+                 },
+                 !obj:pylearn2.models.mlp.Linear {
+                     layer_name: 'y',
+                     irange: 0.01,
+                     dim: 6611
+                 }
+                ],
+        nvis: 2956
+    },
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+        train_iteration_mode: even_shuffled_sequential,
+        monitor_iteration_mode: even_shuffled_sequential,
+        learning_rate: 1e-3,
+        learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
+            init_momentum: .01,
+        },
+        monitoring_dataset:
+            {
+                'train' : *train,
+                'valid' : !obj:predict_data.load_data {
+                            start: 80,
+                            stop: 100,
+                            input: %(input)s,
+                            output: %(output)s
+                          },
+                'test'  : !obj:predict_data.load_data {
+                            start: 100,
+                            stop: 111,
+                            input: %(input)s,
+                            output: %(output)s
+                          }
+            },
+        #cost: !obj:pylearn2.costs.mlp.Default {},
+        cost: !obj:pylearn2.costs.mlp.dropout.Dropout {
+            input_include_probs: { 'h1' : .8, 'h2' : .8, 'y' : .8},
+            input_scales: { 'h1' : 2.0, 'h2' : 2.0, 'y': 2.0}
+        },
+        termination_criterion: !obj:pylearn2.termination_criteria.And {
+            criteria: [
+                 !obj:pylearn2.termination_criteria.EpochCounter {
+                    max_epochs: %(max_epochs)i
+                }
+            ]
+        },
+        update_callbacks: !obj:pylearn2.training_algorithms.sgd.ExponentialDecay {
+            decay_factor: 1.00004,
+            min_lr: .000001
+        }
+    },
+    extensions: [
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'valid_objective',
+             save_path: "../PKL/dae_mlp_best.pkl"
+        },
+        !obj:pylearn2.training_algorithms.learning_rule.MomentumAdjustor {
+            start: 1,
+            saturate: 250,
+            final_momentum: .7
+        }
+    ],
+    save_path: "../PKL/dae_eqtl_mlp.pkl",
+    save_freq: 1
+}

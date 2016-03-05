@@ -1,0 +1,30 @@
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:predict_data.load_data {
+        start: 0,
+        stop: 80,
+        input: %(input)s,
+        output: %(output)s
+    },
+    model: !obj:pylearn2.models.autoencoder.DenoisingAutoencoder {
+        nvis : 2956,
+        nhid : %(nhid)i,
+        irange : 0.01,
+        corruptor: !obj:pylearn2.corruption.BinomialCorruptor {
+            corruption_level: .3, #Instance of a corruptor object to use for corrupting the input.
+        },
+        act_enc: "sigmoid", #tanh, sigmoid Use null for linear units
+        act_dec: null,    # Linear activation on the decoder side.
+    },
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+        learning_rate : 1e-5,
+        batch_size : %(batch_size)i,
+        monitoring_batches : %(monitoring_batches)i,
+        monitoring_dataset : *train,
+        cost : !obj:pylearn2.costs.autoencoder.MeanSquaredReconstructionError {},
+        termination_criterion : !obj:pylearn2.termination_criteria.EpochCounter {
+            max_epochs: %(max_epochs)i,
+        },
+    },
+    save_path: "%(save_path)s/dae_layer1.pkl",
+    save_freq: 1
+}

@@ -1,0 +1,164 @@
+# Manual to install package needed for pylearn2, please execute the command one at a time.
+# replace the jh7x3 with you account name
+
+### install python2.7.5 
+
+>cd /home/jh7x3/tools
+
+> wget http://python.org/ftp/python/2.7.5/Python-2.7.5.tgz
+
+> tar -xvf Python-2.7.5.tgz
+
+> cd Python-2.7.5
+
+> ./configure --prefix=/home/jh7x3/tools/Python-2.7.5/  CFLAGS=-fPIC (require CFLAGS=-fPIC, otherwise, theano doesn't work http://taoo.iteye.com/blog/1826912)
+
+> make 
+
+> make install
+
+
+
+**** /home/jh7x3/.local/lib/python2.7/site-packages
+
+export PYTHONPATH=/home/rxpkd/tools/Python-2.7.5/lib/python2.7/site-packages/lib/python2.7/site-packages/
+
+source ~/.bashrc
+
+
+### install fortran (Need install fortran in iris server, otherwise, wheel, numpy, scipy, Theano couldn't be installed)
+
+> http://users.physik.fu-berlin.de/~tburnus/gcc-trunk/
+
+Latest 4.5 build (gcc-4.5-x86_64.tar.gz)
+
+saved in /home/jh7x3/tools/gcc-4.5/bin
+
+#call: /home/jh7x3/tools/gcc-4.5/bin/gfortran
+
+alias gfortran='/home/jh7x3/tools/usr/local/gfortran/bin/gfortran'
+
+
+
+######## set gfortran environment
+
+export PATH=/home/jh7x3/tools/gcc-4.5/bin/gfortran:${PATH}
+
+export PATH=/home/jh7x3/tools/gcc-4.5/bin/:${PATH}
+source ~/.bashrc
+
+ 
+
+#### can't find libmpc.so.2 
+
+https://gcc.gnu.org/ml/fortran/2010-04/msg00059.html
+
+http://nosemaj.org/debian-gcc-4-7
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib:/home/jh7x3/tools/gcc-4.5/lib:/home/jh7x3/tools/gcc-4.5/lib64
+
+
+
+
+##############pay attention please use your own python to install the following packages
+
+
+
+### start to install packages
+
+1. numpy-1.9.3.tar.gz
+
+2. scipy-0.11.0.tar.gz
+
+3. Theano-0.7.0.tar.gz
+
+	> echo 'export PYTHONPATH=${PYTHONPATH}:/home/jh7x3/tools/python_package/lib/python2.7/site-packages/theano' >> ${HOME}/.bashrc
+
+		source ~/.bashrc
+
+#Packages below are optional
+4. matplotlib.tar.gz		
+
+5. setuptools-0.9.8.tar.gz
+
+6. libpng-1.6.3.tar.gz (http://techtorials.me/linux/install-python-in-home-linux-directory/)
+
+7. nose-1.3.7.tar.gz 
+
+
+
+Install method: 
+
+> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 setup.py install  --prefix=/home/jh7x3/tools/Python-2.7.5/lib/python2.7/site-packages
+
+
+Test methods: 
+
+> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 -c "import matplotlib"
+
+
+
+
+############### Down load Pylean2 in http://deeplearning.net/software/pylearn2/
+
+
+
+> cd /home/jh7x3/tools/
+
+> git clone git://github.com/lisa-lab/pylearn2.git
+
+> tar -zxvf pylearn2.tar.gz 
+
+>  cd pylearn2
+
+ /home/jh7x3/tools/Python-2.7.5/bin/python2.7  setup.py develop --user  --prefix=/home/jh7x3/tools/python_package
+
+
+#add plearn2 path to ~/.bashrc
+
+echo 'export PYTHONPATH=/home/jh7x3/tools/pylearn2:$PYTHONPATH' >> ${HOME}/.bashrc
+
+echo 'export PYLEARN2_DATA_PATH=/home/jh7x3/tools/pylearn2' >> ${HOME}/.bashrc
+
+echo 'export PATH=/home/jh7x3/tools/pylearn2/pylearn2/scripts:${PATH}' >> ${HOME}/.bashrc
+
+source ~/.bashrc
+
+########### in order to let these package works, I run it on mac first
+
+
+
+###########  Quick start: http://www.cnblogs.com/tornadomeet/p/3424520.html
+
+> cd /home/jh7x3/tools/pylearn2/pylearn2/scripts/tutorials/grbm_smd
+
+> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 make_dataset.py
+
+****** encounter problem: data/cifar10/cifar-10-batches-py/data_batch_1 was not found
+
+solved by http://labs.beatcraft.com/en/index.php?Deep%20Learning%2FInstalling%20Pylearn2%20on%20CUDA
+
+			> cd /home/jh7x3/tools/pylearn2/pylearn2/scripts/datasets 
+
+			>  ./download_cifar10.sh 
+
+			> cd /home/jh7x3/tools/pylearn2/pylearn2/scripts/tutorials/grbm_smd
+
+			> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 make_dataset.py
+
+
+
+> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 /home/jh7x3/tools/pylearn2/pylearn2/scripts/train.py cifar_grbm_smd.yaml 
+
+> echo 'export PYLERN2_VIEWER_COMMAND="Eog--new-instance"' >> ${HOME}/.bashrc
+
+> source ~/.bashrc
+
+> install Pillow-2.1.0.zip
+
+	> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 setup.py install  --prefix=/home/jh7x3/tools/python_package 
+
+> /home/jh7x3/tools/Python-2.7.5/bin/python2.7 /home/jh7x3/tools/pylearn2/pylearn2/scripts/show_weights.py cifar_grbm_smd.pkl --out=weights.png
+
+
+
